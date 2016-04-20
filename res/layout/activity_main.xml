@@ -103,7 +103,7 @@
                 android:layout_marginRight="33dp"
                 android:background="@drawable/close_change" />
         </FrameLayout>
-
+  
         <Button
             android:id="@+id/login"
             android:layout_width="match_parent"
@@ -136,7 +136,18 @@
             android:text="注册"
             android:textSize="16sp"
             android:visibility="visible" />
+
+        <RadioButton
+            android:id="@+id/RadioButton1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/usercode_layout"
+            android:text="记住密码" />
+
     </RelativeLayout>
+      
+   
 
     <RelativeLayout
         android:id="@+id/remember_layout000"

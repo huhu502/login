@@ -1,6 +1,13 @@
 package com.example.checkmobilecommect;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +28,7 @@ import com.example.Utils.MyHttpConnect;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.method.HideReturnsTransformationMethod;
@@ -29,13 +37,17 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.Toast;
 
 public class LoginActivity extends Activity {
 	private EditText mUserName;
 	private EditText mPassword;
-	private boolean isHidden=true;
+	private boolean isHidden=true,isCheck;
+	private String filename="info.txt";
 	HttpClient client = new DefaultHttpClient();
 	private Button bt_pwd_eye,mLogin;
+	private String name,pwd;
 	private String url="http://localhost:8089/ServerTest/login.jsp";
 	public void myUserClear(View view){
 		mUserName.setText("");
@@ -54,7 +66,7 @@ public class LoginActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				
+				savePassword();
 			}
 		});
 	}
@@ -66,10 +78,61 @@ public class LoginActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		mUserName=(EditText)findViewById(R.id.username);
+		mPassword=(EditText)findViewById(R.id.password);
 		PostConnect();
 		init();
+		myLogin();
+		setNameAndPwd();
 	}
-	
+	//保存密码
+	private void savePassword(){
+		RadioButton mRadioButton=(RadioButton)findViewById(R.id.RadioButton1);
+		isCheck=mRadioButton.isChecked();
+		 name=mUserName.getText().toString();
+		 pwd=mPassword.getText().toString();
+		 System.out.println("aaa "+name+"bbb "+pwd+"ccc "+isCheck);
+		//判断sdk是否存在
+		if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+			String path=Environment.getExternalStorageDirectory().getAbsolutePath();
+			try {
+				PrintWriter out=new PrintWriter(new FileOutputStream(path+"/"+filename));
+				out.println(name);
+				out.println(pwd);
+				out.println(isCheck);
+				out.flush();
+				out.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}else{
+			Toast.makeText(LoginActivity.this,"sd卡不可用", 0).show();
+		}
+		
+	}
+	//记住密码后有默认的用户名和密码
+	private void setNameAndPwd(){
+		if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+			File file=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/"+filename);
+			try {
+				BufferedReader br=new BufferedReader(new FileReader(file));
+				StringBuffer sb=new StringBuffer();
+				String mName=br.readLine();
+				String mPwd=br.readLine();
+				String check=br.readLine();
+				System.out.println("----"+mName+"111"+mPwd+"dsds"+check);
+				if(check.equals("true")){
+					mUserName.setText(mName);
+					mPassword.setText(mPwd);
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}else{
+			Toast.makeText(LoginActivity.this,"sd卡不可用", 0).show();
+		}
+	}
 	//点击后密码显示或者隐藏
 	 private void init(){
 		 bt_pwd_eye=(Button) findViewById(R.id.bt_pwd_eye);
@@ -96,14 +159,12 @@ public class LoginActivity extends Activity {
 		  });
 	}
 	private void PostConnect(){
-		mUserName=(EditText)findViewById(R.id.username);
-		mPassword=(EditText)findViewById(R.id.password);
+		
 		
 		new Thread(){
 			public void run(){
 				
-				String name=mUserName.getText().toString();
-				String pwd=mPassword.getText().toString();
+				
 				List<NameValuePair> params=new ArrayList<NameValuePair>();
 				params.add(new BasicNameValuePair("name", name));
 				params.add(new BasicNameValuePair("pwd", pwd));
